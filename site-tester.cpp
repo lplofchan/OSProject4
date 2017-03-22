@@ -92,54 +92,6 @@ string fetch_webpage() {
   return output;
 
 }
-
-void parse_config(char* config) {
-    int PERIOD_FETCH = 180;
-    int NUM_FETCH = 1;
-    int NUM_PARSE = 1;
-    string SEARCH_FILE = "Search.txt";
-    string SITE_FILE = "Sites.txt";
-    ifstream myfile;
-    myfile.open(config);
-    string line;
-    //stringstream ss;
-    string item;
-    vector<string> tokens;
-    if (myfile.is_open()) {
-        while (getline(myfile, line)) {
-          stringstream ss(line);
-          //ss.str(line);
-          while (getline(ss,item, '=')) {
-            tokens.push_back(item);
-            //cout << item << endl;
-          }
-          if (tokens[0] == "PERIOD_FETCH") {
-              PERIOD_FETCH = stoi((tokens[1]));
-          }
-          else if (tokens[0] == "NUM_FETCH") {
-              NUM_FETCH = stoi((tokens[1]));
-          }else if (tokens[0] == "NUM_PARSE") {
-              NUM_PARSE = stoi((tokens[1]));
-          }
-
-          else if (tokens[0] == "SEARCH_FILE") {
-              SEARCH_FILE = (tokens[1]);
-          }
-          else if (tokens[0] == "SITE_FILE") {
-              SITE_FILE = (tokens[1]);
-          }
-          else if (tokens[0] != "1") {
-              cout << "Unknown paramater" << endl;
-          }
-          tokens.clear();
-        }
-        myfile.close();
-    }
-    else {
-        cout << "unable to open file" << endl;
-    }
-
-}
  
 int main(int argc, char *argv[])
 {
@@ -148,5 +100,10 @@ int main(int argc, char *argv[])
   Parse p;
   p.parse_config(argv[1]);
   p.parse_search_file();
+
+  for (unsigned int i=0; i<p.sites.size(); i++) {
+    fetchQueue.push(p.sites[i]);
+    cout << fetchQueue[i] << endl;
+  }
 
 }
