@@ -24,16 +24,16 @@ class Queue {
        pthread_mutex_t lock;
        queue<T> Q;
 
-}
+};
 
 // constructor
 template<typename T>
-Queue::Queue() {
+Queue<T>::Queue() {
     lock = PTHREAD_MUTEX_INITIALIZER;
 }
 
 template<typename T>
-void Queue::push(T element) {
+void Queue<T>::push(T element) {
     pthread_mutex_lock(&lock);
     Q.push(element);
     pthread_mutex_unlock(&lock);
@@ -41,10 +41,10 @@ void Queue::push(T element) {
 }
 
 template<typename T>
-void Queue::pop() {
+void Queue<T>::pop() {
     pthread_mutex_lock(&lock);
     Q.pop();
     pthread_mutex_unlock(&lock);
 }
 
-#endif _QUEUE_
+#endif

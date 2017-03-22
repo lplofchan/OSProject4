@@ -12,8 +12,10 @@ Leah Plofchan and Brynna Conway */
 #include <sstream>
 #include <cstdlib>
 #include "Queue.h"
+#include "parse.h"
 
 using namespace std;
+
 
 Queue<string> fetchQueue;
 Queue<string> parseQueue;
@@ -142,6 +144,9 @@ void parse_config(char* config) {
 int main(int argc, char *argv[])
 {
   cout << fetch_webpage() << endl;
-  //parse_config(argv[1]);
+  
+  Parse p;
+  p.parse_config(argv[1]);
+  p.parse_search_file();
 
 }
