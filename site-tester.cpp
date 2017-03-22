@@ -16,7 +16,6 @@ Leah Plofchan and Brynna Conway */
 
 using namespace std;
 
-
 Queue<string> fetchQueue;
 Queue<string> parseQueue;
 
@@ -93,17 +92,16 @@ string fetch_webpage() {
 
 }
  
-int main(int argc, char *argv[])
-{
-  cout << fetch_webpage() << endl;
+int main(int argc, char *argv[]) {
+
+  //cout << fetch_webpage() << endl;
   
   Parse p;
   p.parse_config(argv[1]);
-  p.parse_search_file();
-
-  for (unsigned int i=0; i<p.sites.size(); i++) {
-    fetchQueue.push(p.sites[i]);
-    cout << fetchQueue[i] << endl;
+  p.parse_site_file();
+  for (unsigned int i=0; i<p.get_sites_size(); i++) {
+    fetchQueue.push(p.get_site(i));
+    cout << fetchQueue.back() << endl;
   }
 
 }

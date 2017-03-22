@@ -19,11 +19,12 @@ class Queue {
         Queue();        // constructor
         void push(T element);
         void pop();
+        T front();
+        T back();
 
     private:
        pthread_mutex_t lock;
        queue<T> Q;
-
 };
 
 // constructor
@@ -45,6 +46,22 @@ void Queue<T>::pop() {
     pthread_mutex_lock(&lock);
     Q.pop();
     pthread_mutex_unlock(&lock);
+}
+
+template<typename T>
+T Queue<T>::front() {
+    pthread_mutex_lock(&lock);
+    T elem = Q.front();
+    pthread_mutex_unlock(&lock);
+    return elem;
+}
+
+template<typename T>
+T Queue<T>::back() {
+    pthread_mutex_lock(&lock);
+    T elem = Q.back();
+    pthread_mutex_unlock(&lock);
+    return elem; 
 }
 
 #endif

@@ -18,6 +18,8 @@ class Parse {
         void parse_config(char *config);
         void parse_site_file();
         void parse_search_file();
+        string get_site(unsigned int i); 
+        unsigned int get_sites_size();
 
     private:
         int PERIOD_FETCH;
@@ -100,6 +102,14 @@ void Parse::parse_search_file() {
             searches.push_back(line);
         }
     }
+}
+
+string Parse::get_site(unsigned int i) {
+    return sites[i];
+}
+
+unsigned int Parse::get_sites_size() {
+    return sites.size();
 }
 
 #endif
