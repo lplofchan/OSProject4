@@ -18,12 +18,14 @@ class Queue {
     public:
         Queue();        // constructor
         void push(T element);
-        void pop();
+        T pop();
         T front();
         T back();
-
+        bool empty();
+        unsigned int size();
+        pthread_mutex_t lock;
+        
     private:
-       pthread_mutex_t lock;
        queue<T> Q;
 };
 
@@ -35,33 +37,37 @@ Queue<T>::Queue() {
 
 template<typename T>
 void Queue<T>::push(T element) {
-    pthread_mutex_lock(&lock);
     Q.push(element);
-    pthread_mutex_unlock(&lock);
-
 }
 
 template<typename T>
-void Queue<T>::pop() {
-    pthread_mutex_lock(&lock);
+T Queue<T>::pop() {
+    T elem = Q.front();
     Q.pop();
-    pthread_mutex_unlock(&lock);
+    return elem;
 }
 
 template<typename T>
 T Queue<T>::front() {
-    pthread_mutex_lock(&lock);
     T elem = Q.front();
-    pthread_mutex_unlock(&lock);
     return elem;
 }
 
 template<typename T>
 T Queue<T>::back() {
-    pthread_mutex_lock(&lock);
     T elem = Q.back();
-    pthread_mutex_unlock(&lock);
     return elem; 
 }
 
+template<typename T>
+unsigned int Queue<T>::size() {
+    int mysize = Q.size();
+    return mysize; 
+}
+
+template<typename T> 
+bool Queue<T>::empty() {
+    bool is_empty = Q.empty();
+    return is_empty;
+}
 #endif
