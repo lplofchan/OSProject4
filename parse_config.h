@@ -21,7 +21,9 @@ class Parse {
         string get_site(unsigned int i); 
         unsigned int get_sites_size();
         unsigned int get_searches_size();
-        string get_search_term(unsigned int i); 
+        string get_search_term(unsigned int i);
+        int get_num_fetch();
+        int get_num_parse(); 
 
     private:
         int PERIOD_FETCH;
@@ -120,6 +122,14 @@ unsigned int Parse::get_searches_size() {
 
 string Parse::get_search_term(unsigned int i) {
     return searches[i];
+}
+
+int Parse::get_num_fetch() {
+    return NUM_FETCH;
+}
+
+int Parse::get_num_parse() {
+    return NUM_PARSE;
 }
 
 #endif
