@@ -24,6 +24,7 @@ class Parse {
         string get_search_term(unsigned int i);
         int get_num_fetch();
         int get_num_parse(); 
+        int get_period();
 
     private:
         int PERIOD_FETCH;
@@ -130,6 +131,10 @@ int Parse::get_num_fetch() {
 
 int Parse::get_num_parse() {
     return NUM_PARSE;
+}
+
+int Parse::get_period() {
+    return PERIOD_FETCH;
 }
 
 #endif
