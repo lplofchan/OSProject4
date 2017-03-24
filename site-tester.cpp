@@ -217,6 +217,9 @@ void * exit_func(void * pData) {
 			  fprintf(stderr, "ERROR: %s\n", strerror(errno));
 		}
 	}
+  curl_global_cleanup();
+  free(parse_threads);
+  free(fetch_threads);
   pthread_mutex_unlock(&exit_lock); 
   
 }
