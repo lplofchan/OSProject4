@@ -21,21 +21,23 @@ Leah Plofchan and Brynna Conway */
 
 using namespace std;
 
+// Global Variabeles
 Queue<string> producerQueue;
-Queue<tuple <string, string, string> > consumerQueue;
-Parse p;
-pthread_cond_t consumer_cond = PTHREAD_COND_INITIALIZER; 
-pthread_cond_t producer_cond = PTHREAD_COND_INITIALIZER;
-pthread_cond_t exit_cond = PTHREAD_COND_INITIALIZER; 
-pthread_t *fetch_threads = (pthread_t *)malloc(sizeof(pthread_t) * p.get_num_fetch());
-pthread_t *parse_threads = (pthread_t *)malloc(sizeof(pthread_t) * p.get_num_parse());
-pthread_t exit_thread; 
+Queue<tuple <string, string, string> > consumerQueue;   // tuple holds the site name, data, and fetch time
+Parse p;  // instantiate parse object
+pthread_cond_t consumer_cond = PTHREAD_COND_INITIALIZER; // condition variable for consumer
+pthread_cond_t producer_cond = PTHREAD_COND_INITIALIZER;  // condition variable for producer
+pthread_cond_t exit_cond = PTHREAD_COND_INITIALIZER; // condition variable for exit condition
+pthread_t *fetch_threads = (pthread_t *)malloc(sizeof(pthread_t) * p.get_num_fetch()); // array of fetch threads
+pthread_t *parse_threads = (pthread_t *)malloc(sizeof(pthread_t) * p.get_num_parse()); // array of parse threads
+pthread_t exit_thread;
 pthread_mutex_t exit_lock = PTHREAD_MUTEX_INITIALIZER;
 ofstream output_file;
 int keeplooping = 1;
 int site_error_flag = 0;
 int exit_var = 1; 
 
+// LIBCURL CODE
 struct MemoryStruct {
   char *memory;
   size_t size;
@@ -48,7 +50,7 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
   size_t realsize = size * nmemb;
   struct MemoryStruct *mem = (struct MemoryStruct *)userp;
  
-  mem->memory = (char*)realloc(mem->memory, mem->size + realsize + 1);
+  mem->memory = (char*)realloc(mem->memory, mem->size + realsize + 1);  // create larger memory block
   if(mem->memory == NULL) {
     printf("not enough memory (realloc returned NULL)\n");
     return 0;
@@ -65,7 +67,7 @@ string fetch_webpage(string site_name) {
   CURLcode res;
   const char *site = site_name.c_str();
   struct MemoryStruct chunk;
-  CURL *curl_handle;
+  CURL *curl_handle;      // one handle per thread
   chunk.memory = (char*)malloc(1);  /* will be grown as needed by the realloc above */ 
   chunk.size = 0;    /* no data at this point */ 
  
@@ -95,14 +97,13 @@ string fetch_webpage(string site_name) {
   
   /* cleanup curl stuff */ 
   curl_easy_cleanup(curl_handle);
-  string output = chunk.memory; 
- 
+  string output = strdup(chunk.memory); 
+  
   free(chunk.memory);
   /* we're done with libcurl, so clean it up */ 
   
  
   return output;
-
 }
 
 int parse_data(string site_data, string search_string) { 
@@ -117,6 +118,7 @@ int parse_data(string site_data, string search_string) {
   return count; 
 }
 
+// find fetch time for each site
 string get_time() {
   time_t time1; 
   struct tm *time_info; 
@@ -131,28 +133,26 @@ string get_time() {
  
 void * threadFetch(void * pData) {
   while(1) {
-    //condition_variable; 
-    
     pthread_mutex_lock(&producerQueue.lock);
-    while (producerQueue.empty()) 
+    while (producerQueue.empty())         // keep waiting until something is added to the producer queue
       pthread_cond_wait(&producer_cond, &producerQueue.lock); 
-    string site = producerQueue.pop(); 
+    string site = producerQueue.pop(); // obtain the site
     pthread_mutex_unlock(&producerQueue.lock);
-    string output = fetch_webpage(site);
-    //cout << output << endl;
+    string output = fetch_webpage(site);    // use libcurl to get data from webpage
     pthread_mutex_lock(&consumerQueue.lock);
-    if (output != "e") {
+    if (output != "e") {                // check for errors in bad websites/timeouts
       auto output_data = make_tuple(site, output, get_time());
       consumerQueue.push(output_data); 
     }
     if (output == "e") {
       site_error_flag = 1;
     }
-    pthread_cond_broadcast(&consumer_cond);
+    pthread_cond_broadcast(&consumer_cond);     // signal to all of the consumers
     pthread_mutex_unlock(&consumerQueue.lock);
   }
 }
 
+// retrieve info to put into output file
 void * threadParse(void * pData) {
   while(1) {
     pthread_mutex_lock(&consumerQueue.lock);
@@ -169,15 +169,11 @@ void * threadParse(void * pData) {
     auto site_data = consumerQueue.pop();
     for (unsigned int i = 0; i < p.get_searches_size(); i++) { // search for each search term
         string search_term = p.get_search_term(i); 
-        cout << "search term: " << search_term << endl;
         string site = get<0>(site_data);
-        cout << "site: " << site << endl;
         string output = get<1>(site_data);
         string my_time = get<2>(site_data);
         int count = parse_data(output, search_term);
-        cout << "count: " << count << endl;
         output_file << my_time + "," + site + "," + search_term + "," + to_string(count) + "\n"; 
-        //cout << "output: " << output_file << endl;
    }
     pthread_mutex_unlock(&consumerQueue.lock);
   }
