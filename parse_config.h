@@ -37,11 +37,11 @@ class Parse {
 };
 
 Parse::Parse() {
-    int PERIOD_FETCH = 180;
-    int NUM_FETCH = 1;
-    int NUM_PARSE = 1;
-    string SEARCH_FILE = "Search.txt";
-    string SITE_FILE = "Sites.txt";
+    PERIOD_FETCH = 180;
+    NUM_FETCH = 1;
+    NUM_PARSE = 1;
+    SEARCH_FILE = "Search.txt";
+    SITE_FILE = "Sites.txt";
 }
 
 void Parse::parse_config(char *config) {
@@ -64,9 +64,18 @@ void Parse::parse_config(char *config) {
           }
           else if (tokens[0] == "NUM_FETCH") {
               NUM_FETCH = stoi((tokens[1]));
+              if (NUM_FETCH <= 0) 
+                NUM_FETCH = 1;
+              if (NUM_FETCH > 8) 
+                NUM_FETCH = 8;
+              
           }
           else if (tokens[0] == "NUM_PARSE") {
               NUM_PARSE = stoi((tokens[1]));
+              if (NUM_PARSE <= 0) 
+                NUM_PARSE = 1;
+              if (NUM_PARSE > 8) 
+                NUM_PARSE = 8;
           }
 
           else if (tokens[0] == "SEARCH_FILE") {
@@ -83,18 +92,24 @@ void Parse::parse_config(char *config) {
         myfile.close();
     }
     else {
-        cout << "unable to open file" << endl;
+        cout << "Unable to open configuration file" << endl;
+        exit(1);
     }    
 }
 
 void Parse::parse_site_file() {
     ifstream myfile;
     myfile.open(SITE_FILE);
+
     string line;
     if (myfile.is_open()) {
         while (getline(myfile, line)) {
             sites.push_back(line);
         }
+    }
+    else {
+        cout << "Site file failed to open" << endl;
+        exit(1);
     }
 }
 
@@ -106,6 +121,10 @@ void Parse::parse_search_file() {
         while (getline(myfile, line)) {
             searches.push_back(line);
         }
+    }
+    else {
+        cout << "Search file failed to open" << endl;
+        exit(1);
     }
 }
 
