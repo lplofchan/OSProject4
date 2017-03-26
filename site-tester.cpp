@@ -25,13 +25,13 @@ using namespace std;
 Queue<string> producerQueue;
 Queue<tuple <string, string, string> > consumerQueue;   // tuple holds the site name, data, and fetch time
 Parse p;  // instantiate parse object
-pthread_cond_t consumer_cond = PTHREAD_COND_INITIALIZER; // condition variable for consumer
-pthread_cond_t producer_cond = PTHREAD_COND_INITIALIZER;  // condition variable for producer
-pthread_cond_t exit_cond = PTHREAD_COND_INITIALIZER; // condition variable for exit condition
-pthread_t *fetch_threads = (pthread_t *)malloc(sizeof(pthread_t) * p.get_num_fetch()); // array of fetch threads
-pthread_t *parse_threads = (pthread_t *)malloc(sizeof(pthread_t) * p.get_num_parse()); // array of parse threads
+pthread_cond_t consumer_cond; // condition variable for consumer
+pthread_cond_t producer_cond;  // condition variable for producer
+pthread_cond_t exit_cond; // condition variable for exit condition
+pthread_t *fetch_threads;  // array of fetch threads
+pthread_t *parse_threads;  // array of parse threads
 pthread_t exit_thread;
-pthread_mutex_t exit_lock = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t exit_lock;
 ofstream output_file;
 int keeplooping = 1;
 int site_error_flag = 0;
@@ -226,6 +226,13 @@ int main(int argc, char *argv[]) {
     cout << "No configuration file specified" << endl;
     exit(1);
   }
+  fetch_threads = (pthread_t *)malloc(sizeof(pthread_t) * p.get_num_fetch());
+  parse_threads = (pthread_t *)malloc(sizeof(pthread_t) * p.get_num_parse());
+  consumer_cond = PTHREAD_COND_INITIALIZER; // condition variable for consumer
+  producer_cond = PTHREAD_COND_INITIALIZER;  // condition variable for producer
+  exit_cond = PTHREAD_COND_INITIALIZER;
+  exit_lock = PTHREAD_MUTEX_INITIALIZER;
+
   p.parse_config(argv[1]); // get all of config variables 
   p.parse_site_file(); // create vector of sites 
   p.parse_search_file(); // create vector of search terms 
